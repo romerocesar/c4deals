@@ -1,6 +1,9 @@
 import os
+import logging
 
 import discord
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
