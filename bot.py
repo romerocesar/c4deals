@@ -17,14 +17,15 @@ class C4Deals(discord.Client):
         super().__init__(*args, intents=intents, **kwargs)
         self.approvers = config.get('approvers')
         self.token = config.get('token')
-        self.deals_fetcher = SlickDealsFetcher()
+        self.deals_fetcher = SlickDealsFetcher(html=open('test.html').read())
 
     async def on_ready(self):
         deals = self.deals_fetcher.fetch_deals()
         for userid in self.approvers:
             user = await client.fetch_user(userid)
             deal = deals.iloc[0]
-            await user.send(f'do you approve this {deal=}')
+            msg = self.deals_fetcher.format_message(deal)
+            await user.send(msg)
 
 
 config = yaml.safe_load(open('config.yaml'))

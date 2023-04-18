@@ -11,8 +11,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 class SlickDealsFetcher:
 
-    def __init__(self, html=None):
-        self.url = "https://slickdeals.net/video-game-deals/"
+    def __init__(self, html=None, category='video-game-deals'):
+        self.category = category
+        self.base_url = 'https://slickdeals.net'
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
@@ -22,7 +23,8 @@ class SlickDealsFetcher:
         if self.html:
             decoded = self.html
         else:
-            response = requests.get(self.url, headers=self.headers)
+            url = f"{self.base_url}/{self.category}/"
+            response = requests.get(url, headers=self.headers)
             decoded = response.content.decode("utf-8")
             now = datetime.now().strftime("%Y-%m-%d-%H-%M-%s")
             fname = f'{now}.html'
@@ -34,14 +36,13 @@ class SlickDealsFetcher:
         deals = []
         for card in cards:
             try:
-                deals.append(SlickDealsFetcher._parse_card(card))
+                deals.append(self.parse_card(card))
             except Exception as e:
                 logger.warning(f'failed to parse {card=}. {e}')
         df = pd.DataFrame(deals)
         return df
 
-    @staticmethod
-    def _parse_card(card):
+    def parse_card(self, card):
         deal = dict()
         deal['id'] = card.get('id')
         deal['title'] = card.find('a', class_="bp-c-card_title").text
@@ -53,4 +54,9 @@ class SlickDealsFetcher:
         deal['votes'] = card.find('span', class_='bp-p-votingThumbsPopup_voteCount').text
         deal['frontpage'] = bool(card.find('span', class_='bp-c-label--frontpage'))
         deal['popular'] = bool(card.find('span', class_='bp-c-label--popular'))
+        deal['url'] = f'{self.base_url}' + card.find('a', class_='bp-c-card_title').get('href')
         return deal
+
+    def format_message(self, deal):
+        deal = deal[['original-price', 'store', 'url']]
+        return str(deal)
