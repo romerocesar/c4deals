@@ -4,6 +4,7 @@ import logging
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
+from tabulate import tabulate
 
 logger = logging.getLogger('c4deals')
 logging.basicConfig(level=logging.DEBUG)
@@ -57,6 +58,5 @@ class SlickDealsFetcher:
         deal['url'] = f'{self.base_url}' + card.find('a', class_='bp-c-card_title').get('href')
         return deal
 
-    def format_message(self, deal):
-        deal = deal[['original-price', 'store', 'url']]
-        return str(deal)
+    def format_message(self, deal: pd.Series = None) -> str:
+        return ' '.join(list(deal[['original-price', 'store', 'url']]))
