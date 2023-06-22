@@ -4,7 +4,6 @@ import logging
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
-from tabulate import tabulate
 
 logger = logging.getLogger('c4deals')
 logging.basicConfig(level=logging.DEBUG)
@@ -59,4 +58,6 @@ class SlickDealsFetcher:
         return deal
 
     def format_message(self, deal: pd.Series = None) -> str:
-        return ' '.join(list(deal[['original-price', 'store', 'url']]))
+        msg = ' '.join(list(deal[['original-price', 'store', 'url']]))
+        msg += ' click \U0001F44D to approve or \U0001F44E to reject this deal.'
+        return msg
